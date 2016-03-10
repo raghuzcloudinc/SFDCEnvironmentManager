@@ -1,0 +1,152 @@
+<project name="Sample usage of Salesforce Ant tasks" default="test" basedir="." xmlns:sf="antlib:com.salesforce">
+
+	<property file="build.properties"/>
+	<property environment="env"/>
+
+	<!-- Setting default value for username, password and session id properties to empty string 
+		 so unset values are treated as empty. Without this, ant expressions such as ${sf.username}
+		 will be treated literally.
+	-->
+	<condition property="sf.DevLocalUsername" value=""> <not> <isset property="sf.DevLocalUsername"/> </not> </condition>
+	<condition property="sf.DevLocalPassword" value=""> <not> <isset property="sf.DevLocalPassword"/> </not> </condition>
+	
+	<condition property="sf.DevMajUsername" value=""> <not> <isset property="sf.DevMajUsername"/> </not> </condition>
+	<condition property="sf.DevMajPassword" value=""> <not> <isset property="sf.DevMajPassword"/> </not> </condition>
+
+	<condition property="sf.QaUsername" value=""> <not> <isset property="sf.QaUsername"/> </not> </condition>
+	<condition property="sf.QaPassword" value=""> <not> <isset property="sf.QaPassword"/> </not> </condition>
+	
+	<condition property="sf.MajStgUsername" value=""> <not> <isset property="sf.MajStgUsername"/> </not> </condition>
+	<condition property="sf.MajStgPassword" value=""> <not> <isset property="sf.MajStgPassword"/> </not> </condition>
+    
+	<condition property="sf.DittoUsername" value=""> <not> <isset property="sf.DittoUsername"/> </not> </condition>
+	<condition property="sf.DittoPassword" value=""> <not> <isset property="sf.DittoPassword"/> </not> </condition>
+	
+	<condition property="sf.ProdUsername" value=""> <not> <isset property="sf.ProdUsername"/> </not> </condition>
+	<condition property="sf.ProdPassword" value=""> <not> <isset property="sf.ProdPassword"/> </not> </condition>
+	
+	
+	<condition property="dest.folder" value=""> <not> <isset property="dest.folder"/> </not> </condition>
+	<condition property="sf.sessionId" value=""> <not> <isset property="sf.sessionId"/> </not> </condition>
+
+	<taskdef resource="com/salesforce/antlib.xml" uri="antlib:com.salesforce">
+		<classpath>
+			<pathelement location="${sfdcAnt.path}" />        	
+		</classpath>
+	</taskdef>
+	
+	<!--********************* DevLocal: Start *********************-->
+		<target name="DevLocal_Retrieve">
+			<!-- <mkdir dir="DevLocal_RetrieveUnpackaged"/> -->
+			<!-- Retrieve the contents into another directory -->
+			<sf:retrieve username="${sf.DevLocalUsername}" password="${sf.DevLocalPassword}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" retrieveTarget="${git.folder}" unpackaged="devlocal/package.xml"/>
+		</target>     
+
+		<target name="DevLocal_TestDeploy">
+			<sf:deploy username="${sf.DevLocalUsername}" password="${sf.DevLocalPassword}" serverurl="${sf.SandboxServerurl}" 
+				checkOnly="true" deployRoot="${dest.folder}//devlocal//unpackage" runAllTests="true" />
+		</target> 
+
+		<target name="DevLocal_Deploy">
+			<sf:deploy username="${sf.DevLocalUsername}" password="${sf.DevLocalPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" deployRoot="${dest.folder}//devlocal//unpackage" rollbackOnError="true"/>
+		</target>
+	<!--/////////////////////// DevLocal: End ///////////////////////-->	
+	
+	
+
+	<!--********************* DevMaj: Start *********************-->
+		<target name="DevMaj_Retrieve">
+			<!-- <mkdir dir="DevLocal_RetrieveUnpackaged"/> -->
+			<!-- Retrieve the contents into another directory -->
+			<sf:retrieve username="${sf.DevMajUsername}" password="${sf.DevMajPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" retrieveTarget="${git.folder}" unpackaged="devmaj/package.xml"/>
+		</target>  
+
+		<target name="DevMaj_TestDeploy">
+			<sf:deploy username="${sf.DevMajUsername}" password="${sf.DevMajPassword}" serverurl="${sf.SandboxServerurl}" 
+				checkOnly="true"  deployRoot="${dest.folder}//devmaj//unpackage" runAllTests="true" />
+		</target>   
+		<target name="DevMaj_Deploy">
+			<sf:deploy username="${sf.DevMajUsername}" password="${sf.DevMajPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" deployRoot="${dest.folder}//devmaj//unpackage" rollbackOnError="true"/>
+		</target>
+    	<!--/////////////////////// DevMaj: End ///////////////////////-->	
+
+
+	<!--********************* QA: Start *********************-->
+		<target name="QA_Retrieve">
+			<!--<mkdir dir="QA_RetrieveUnpackaged"/> -->
+			<!-- Retrieve the contents into another directory -->
+			<sf:retrieve username="${sf.QaUsername}" password="${sf.QaPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" retrieveTarget="${git.folder}" unpackaged="qa/package.xml"/>
+		</target> 
+		<target name="QA_TestDeploy">
+			<sf:deploy username="${sf.QaUsername}" password="${sf.QaPassword}" serverurl="${sf.SandboxServerurl}" 
+				checkOnly="true"  deployRoot="${dest.folder}//qa//unpackage" runAllTests="true" />
+		</target>   
+		<target name="QA_Deploy">
+			<sf:deploy username="${sf.QaUsername}" password="${sf.QaPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" deployRoot="${dest.folder}//qa//unpackage" rollbackOnError="true"/>
+		</target>	
+	<!--/////////////////////// QA: End ///////////////////////-->	
+	
+	
+	<!--********************* MajStg: Start ********************* -->
+		<target name="MajStg_Retrieve">
+			<!-- <mkdir dir="MajStg_RetrieveUnpackaged"/> -->
+			<!-- Retrieve the contents into another directory -->
+			<sf:retrieve username="${sf.MajStgUsername}" password="${sf.MajStgPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" retrieveTarget="${git.folder}" unpackaged="majstg/package.xml"/>
+		</target>  
+		<target name="MajStg_TestDeploy">
+			<sf:deploy username="${sf.MajStgUsername}" password="${sf.MajStgPassword}" serverurl="${sf.SandboxServerurl}" 
+				checkOnly="true"  deployRoot="${dest.folder}//majStg//unpackage" runAllTests="true" />
+		</target>   
+		<target name="MajStg_Deploy">
+			<sf:deploy username="${sf.MajStgUsername}" password="${sf.MajStgPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" deployRoot="${dest.folder}//majStg//unpackage" rollbackOnError="true"/>
+		</target>
+	<!--/////////////////////// MajStg: End ///////////////////////-->	
+
+	
+	
+	<!--********************* Ditto: Start ********************* -->
+		<target name="Ditto_Retrieve">
+			<!--<mkdir dir="MajStg_RetrieveUnpackaged"/> -->
+			<!-- Retrieve the contents into another directory -->
+			<sf:retrieve username="${sf.DittoUsername}" password="${sf.DittoPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" retrieveTarget="${git.folder}" unpackaged="majstg/package.xml"/>
+		</target>  
+
+		<target name="Ditto_TestDeploy">
+			<sf:deploy username="${sf.DittoUsername}" password="${sf.DittoPassword}" serverurl="${sf.SandboxServerurl}" 
+				checkOnly="true"  deployRoot="${dest.folder}//ditto//unpackage"  runAllTests="true" />
+		</target>   
+		<target name="Ditto_Deploy">
+			<sf:deploy username="${sf.DittoUsername}" password="${sf.DittoPassword}" sessionId="${sf.sessionId}" serverurl="${sf.SandboxServerurl}" 
+				maxPoll="${sf.maxPoll}" deployRoot="${dest.folder}//ditto//unpackage"  rollbackOnError="true"/>
+		</target>
+
+	<!--/////////////////////// Ditto: End ///////////////////////-->
+
+	
+	<!--********************* Prod: Start ********************* -->
+		<target name="Prod_Retrieve">
+			<!--<mkdir dir="Prod_RetrieveUnpackaged"/>-->
+			<!-- Retrieve the contents into another directory -->
+			<sf:retrieve username="${sf.ProdUsername}" password="${sf.ProdPassword}" sessionId="${sf.sessionId}" serverurl="${sf.ProdServerurl}" 
+				maxPoll="${sf.maxPoll}" retrieveTarget="${git.folder}" unpackaged="prod/package.xml"/>
+		</target>  
+		<target name="Prod_TestDeploy">
+			<sf:deploy username="${sf.ProdUsername}" password="${sf.ProdPassword}" serverurl="${sf.ProdServerurl}" 
+				checkOnly="true"  deployRoot="${dest.folder}//prod//unpackage" runAllTests="true" />
+		</target>   
+		<target name="Prod_Deploy">
+			<sf:deploy username="${sf.ProdUsername}" password="${sf.ProdPassword}" sessionId="${sf.sessionId}" serverurl="${sf.ProdServerurl}" 
+				maxPoll="${sf.maxPoll}" deployRoot="${dest.folder}//prod//unpackage" rollbackOnError="true"/>
+		</target>
+	<!--/////////////////////// Prod: End ///////////////////////-->
+
+</project>
