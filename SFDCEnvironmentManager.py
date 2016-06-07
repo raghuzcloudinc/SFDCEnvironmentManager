@@ -15,17 +15,19 @@ envFolder = ""
 
 DirectoryMap = {"ApexClass" :  "classes","ApexComponent" : "components","ApexPage" : "pages","ApexTrigger" : "triggers",
                 "Community" : "communities","ConnectedApp" : "connectedApps",
-                "CustomApplication" : "applications","CustomLabels" : "labels","CustomObject" : "objects","CustomSite" : "sites",
+                "CustomApplication" : "applications","CustomLabels" : "labels","ValidationRule" : "objects", "CustomObject" : "objects","CustomSite" : "sites",
                 "CustomTab" : "tabs","Flow" : "flows","HomePageComponent" : "homePageComponents","CustomField" : "objects", 
-                "HomePageLayout" : "homePageLayouts","PermissionSet" : "permissionsets","Portal" : "portals","Queue" : "queues",
+                "ListView" : "objects", "WebLink" : "objects", "HomePageLayout" : "homePageLayouts","PermissionSet" : "permissionsets",
+                "Portal" : "portals","Queue" : "queues",
                 "RemoteSiteSetting" : "remoteSiteSettings","StaticResource" : "staticresources",
                 "Workflow" : "workflows","Settings" : "settings", "EmailTemplate": "email"}
 
 FileExtensions = {"ApexClass" :  ".cls","ApexComponent" : ".component","ApexPage" : ".page","ApexTrigger" : ".trigger",
                 "Community" : ".community","ConnectedApp" : ".connectedApp",
-                "CustomApplication" : ".app","CustomLabels" : ".labels","CustomObject" : ".object","CustomSite" : ".site",
+                "CustomApplication" : ".app","CustomLabels" : ".labels","ValidationRule" : ".object", "CustomObject" : ".object","CustomSite" : ".site",
                 "CustomTab" : ".tab","Flow" : ".flow","HomePageComponent" : ".homePageComponent", "CustomField" :".object",
-                "HomePageLayout" : ".homePageLayout","PermissionSet" : ".permissionset","Portal" : ".portal","Queue" : ".queue",
+                "ListView" : ".object", "WebLink" :".object", "HomePageLayout" : ".homePageLayout", 
+		"PermissionSet" : ".permissionset","Portal" : ".portal","Queue" : ".queue",
                 "RemoteSiteSetting" : ".remoteSite","StaticResource" : ".resource",
                 "Workflow" : ".workflow","Settings" : ".settings", "EmailTemplate" : ".email"}
 
@@ -64,10 +66,12 @@ def mergeFiles(sourceEnv, targetEnv):
 	typesList = collection.getElementsByTagName("types")
 	
 	for typeVal in typesList:
+
 		membersList = typeVal.getElementsByTagName('members')
 		if membersList.length > 0 :
 			name = typeVal.getElementsByTagName('name')[0]
 			nameVal = name.childNodes[0].data
+
 			directoryName = DirectoryMap.get(nameVal);
 			fileExtension = FileExtensions.get(nameVal);
 			metalFileExtension = MetaFileExtensions.get(nameVal);
@@ -84,6 +88,12 @@ def mergeFiles(sourceEnv, targetEnv):
 
 					if nameVal == "CustomField":
 						memberVal = getFileName(memberVal);
+
+					if (nameVal == "ValidationRule" or nameVal == "ListView" or nameVal == "WebLink"):
+						if "." in memberVal: 
+							memberVals = memberVal.split('.');
+							memberVal = memberVals[0];
+
 					gitCommand = "git checkout " + sourceEnv;
 					sourceFile1 =  directoryName + "/" + memberVal + fileExtension
 					gitCommand += " " + sourceFile1
@@ -94,7 +104,7 @@ def mergeFiles(sourceEnv, targetEnv):
 
 					#print ("\n   Source File: " + gitCommand);
 					os.system(gitCommand);
-	
+
 	return;
 
 
@@ -114,11 +124,12 @@ def createPackage():
 		if membersList.length > 0 :
 			name = typeVal.getElementsByTagName('name')[0]
 			nameVal = name.childNodes[0].data
+			
 			directoryName = DirectoryMap.get(nameVal);
 			fileExtension = FileExtensions.get(nameVal);
 			metalFileExtension = MetaFileExtensions.get(nameVal);
 			createDir(unpackage + "\\" + directoryName)
-			
+
 
 			for member in membersList:
 				memberVal = member.childNodes[0].data
@@ -126,16 +137,22 @@ def createPackage():
 					deleteDir(unpackage + "\\" + directoryName)
 					coptyAllFiles(GitRepoPath + "\\" + directoryName, unpackage + "\\" + directoryName);
 				else:
-                      
+
 					if nameVal == "CustomField":
 						memberVal = getFileName(memberVal);
+
+					if (nameVal == "ValidationRule" or nameVal == "ListView" or nameVal == "WebLink"):
+						if "." in memberVal: 
+							memberVals = memberVal.split('.');
+							memberVal = memberVals[0];
 						
+
 					if "/" in memberVal: 
 						memberVals = memberVal.split('/');
-    						innerFolder = memberVals[0];
-    						createDir(unpackage + "\\" + directoryName + "\\" + innerFolder);
+						innerFolder = memberVals[0];
+						createDir(unpackage + "\\" + directoryName + "\\" + innerFolder);
 						memberVal = memberVal.replace("/", "\\");
-                      
+
 					sourceFile1 = GitRepoPath + "\\" + directoryName + "\\" + memberVal + fileExtension
 					destFile1 = unpackage + "\\" + directoryName + "\\" + memberVal + fileExtension
 					coptyFile(sourceFile1, destFile1);
